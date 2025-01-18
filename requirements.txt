@@ -8,11 +8,13 @@ cssselect2==0.7.0
 fastapi==0.115.6
 Flask==3.1.0
 fonttools==4.55.3
+gunicorn==23.0.0
 h11==0.14.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.5
 MarkupSafe==3.0.2
+packaging==24.2
 pillow==11.1.0
 pycparser==2.22
 pydantic==2.10.5
