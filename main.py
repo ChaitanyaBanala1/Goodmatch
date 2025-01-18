@@ -11,11 +11,12 @@ app = FastAPI()
 # Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace "*" with a specific domain for production
+    allow_origins=["https://goodmatch.webflow.io"],  # Your Webflow domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Define the root endpoint
 @app.get("/")
