@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrimonial Biodata</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f5f2; /* Soft beige background */
+            color: #333; /* Neutral dark text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ensures full-page coverage */
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            height: 95vh; /* Dynamically fills the viewport */
+            padding: 30px;
+            background-color: #ffffff; /* White content area */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 300px; /* Increased size for a prominent display */
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 40px;
+            color: #5a3a00; /* Rich brown for professionalism */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #d97706; /* Warm orange for section titles */
+            border-bottom: 2px solid #d97706;
+            padding-bottom: 5px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 5px 0;
+        }
+        p strong {
+            color: #5a3a00; /* Highlighted text in rich brown */
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer img {
+            width: 100px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <img src="https://cdn.prod.website-files.com/677c25330c0c35587869e7e7/678c022980b4901633912bc5_Header%201.png" alt="Matrimony design">
+            <h1>Matrimonial Biodata</h1>
+        </div>
+
+        <!-- Content -->
+        <div>
+            <!-- Personal Information -->
+            <div>
+                <p class="section-title">Personal Information</p>
+                <p><strong>Full Name:</strong> {{full_name}}</p>
+                <p><strong>Date of Birth:</strong> {{date_of_birth}}</p>
+                <p><strong>Place of Birth:</strong> {{place_of_birth}}</p>
+                <p><strong>Height:</strong> {{height}}</p>
+            </div>
+
+            <!-- Professional Details -->
+            <div>
+                <p class="section-title">Professional Details</p>
+                <p><strong>Education:</strong> {{education}}</p>
+                <p><strong>Job/Occupation:</strong> {{job_occupation}}</p>
+                <p><strong>Organization:</strong> {{organization}}</p>
+                <p><strong>Annual Income:</strong> {{annual_income}}</p>
+            </div>
+
+            <!-- Family Details -->
+            <div>
+                <p class="section-title">Family Details</p>
+                <p><strong>Father's Name:</strong> {{fathers_name}}</p>
+                <p><strong>Father's Occupation:</strong> {{fathers_occupation}}</p>
+                <p><strong>Mother's Name:</strong> {{mothers_name}}</p>
+                <p><strong>Mother's Occupation:</strong> {{mothers_occupation}}</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <img src="https://cdn.prod.website-files.com/677c25330c0c35587869e7e7/677c2be44922fb216c9a469c_1.svg" alt="Goodmatch Logo">
+        </div>
+    </div>
+</body>
+</html>
