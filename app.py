@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from weasyprint import HTML
 from io import BytesIO
 from fastapi.responses import StreamingResponse
@@ -6,6 +7,15 @@ import os
 
 # Create the FastAPI app instance
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://goodmatch.webflow.io"],  # Add your Webflow domain
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all HTTP headers
+)
 
 @app.post("/generate-pdf/")
 async def generate_pdf(request: Request):
@@ -63,5 +73,3 @@ async def generate_pdf(request: Request):
         )
     except Exception as e:
         return {"error": f"An error occurred while generating the PDF: {str(e)}"}
-    
-    
