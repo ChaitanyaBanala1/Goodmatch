@@ -1,51 +1,36 @@
-from fastapi import FastAPI, Request
-from weasyprint import HTML
-from io import BytesIO
+from fastapi import FastAPI, Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from weasyprint import HTML
+from io import BytesIO
 import os
 
 app = FastAPI()
 
-# Add CORS middleware to handle cross-origin requests
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://goodmatch.webflow.io"],  # Restrict to your Webflow domain
+    allow_origins=["https://goodmatch.webflow.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to FastAPI!"}
-
-# Add GET handler for `/generate-pdf/` to prevent 405 errors
-@app.get("/generate-pdf/")
-async def generate_pdf_get():
-    return {"error": "This endpoint only supports POST requests."}
-
 @app.post("/generate-pdf/")
-async def generate_pdf(request: Request):
-    try:
-        form_data = await request.json()
-    except Exception as e:
-        return {"error": f"Invalid JSON payload: {str(e)}"}
-
-    # Extract fields from the form data
-    full_name = form_data.get("full_name", "N/A")
-    date_of_birth = form_data.get("date_of_birth", "N/A")
-    place_of_birth = form_data.get("place_of_birth", "N/A")
-    height = form_data.get("height", "N/A")
-    education = form_data.get("education", "N/A")
-    job_occupation = form_data.get("job_occupation", "N/A")
-    organization = form_data.get("organization", "N/A")
-    annual_income = form_data.get("annual_income", "N/A")
-    fathers_name = form_data.get("fathers_name", "N/A")
-    fathers_occupation = form_data.get("fathers_occupation", "N/A")
-    mothers_name = form_data.get("mothers_name", "N/A")
-    mothers_occupation = form_data.get("mothers_occupation", "N/A")
-
+async def generate_pdf(
+    full_name: str = Form(..., alias="fields[First%20Name]"),
+    date_of_birth: str = Form(..., alias="fields[Date%20of%20Birth]"),
+    place_of_birth: str = Form(..., alias="fields[Place%20of%20Birth]"),
+    height: str = Form(..., alias="fields[Height]"),
+    education: str = Form(..., alias="fields[Education]"),
+    job_occupation: str = Form(..., alias="fields[Job%20%2F%20Occupation]"),
+    organization: str = Form(..., alias="fields[Organization]"),
+    annual_income: str = Form(..., alias="fields[Annual%20Income]"),
+    fathers_name: str = Form(..., alias="fields[Father's%20Name]"),
+    fathers_occupation: str = Form(..., alias="fields[Father's%20Occupation]"),
+    mothers_name: str = Form(..., alias="fields[Mother's%20Name]"),
+    mothers_occupation: str = Form(..., alias="fields[Mother's%20Occupation]"),
+):
     # Path to the HTML template file
     template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
 
@@ -68,16 +53,15 @@ async def generate_pdf(request: Request):
         biodata_html = biodata_html.replace("{{mothers_name}}", mothers_name)
         biodata_html = biodata_html.replace("{{mothers_occupation}}", mothers_occupation)
 
-        # Generate PDF from HTML
+        # Generate PDF
         pdf_buffer = BytesIO()
         HTML(string=biodata_html).write_pdf(pdf_buffer)
         pdf_buffer.seek(0)
 
-        # Return the PDF as a response
         return StreamingResponse(
             pdf_buffer,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={full_name}_biodata.pdf"}
+            headers={"Content-Disposition": f"attachment; filename={full_name}_biodata.pdf"},
         )
     except Exception as e:
         return {"error": f"An error occurred while generating the PDF: {str(e)}"}
