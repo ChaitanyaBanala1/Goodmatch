@@ -5,44 +5,34 @@ from weasyprint import HTML
 from io import BytesIO
 import os
 
-# Create the FastAPI app instance
 app = FastAPI()
 
-# Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with specific domains for production
+    allow_origins=["*"],  # Replace "*" with specific domains for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Step 1: Add root endpoint for testing
-@app.get("/")
-async def read_root():
-    return {"message": "Welcome to Goodmatch API!"}
-
-# Endpoint to generate a PDF
 @app.post("/generate-pdf/")
 async def generate_pdf(
-    full_name: str = Form(...),
-    date_of_birth: str = Form(...),
-    place_of_birth: str = Form(...),
-    height: str = Form(...),
-    education: str = Form(...),
-    job_occupation: str = Form(...),
-    organization: str = Form(...),
-    annual_income: str = Form(...),
-    fathers_name: str = Form(...),
-    fathers_occupation: str = Form(...),
-    mothers_name: str = Form(...),
-    mothers_occupation: str = Form(...),
+    full_name: str = Form(..., alias="fields[Full%20Name]"),
+    date_of_birth: str = Form(..., alias="fields[Date%20of%20Birth]"),
+    place_of_birth: str = Form(..., alias="fields[Place%20of%20Birth]"),
+    height: str = Form(..., alias="fields[Height]"),
+    education: str = Form(..., alias="fields[Education]"),
+    job_occupation: str = Form(..., alias="fields[Job%20%2F%20Occupation]"),
+    organization: str = Form(..., alias="fields[Organization]"),
+    annual_income: str = Form(..., alias="fields[Annual%20Income]"),
+    fathers_name: str = Form(..., alias="fields[Father's%20Name]"),
+    fathers_occupation: str = Form(..., alias="fields[Father's%20Occupation]"),
+    mothers_name: str = Form(..., alias="fields[Mother's%20Name]"),
+    mothers_occupation: str = Form(..., alias="fields[Mother's%20Occupation]"),
 ):
-    # Path to the HTML template file
     template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
 
     try:
-        # Read the HTML template
         with open(template_path, "r", encoding="utf-8") as file:
             biodata_html = file.read()
 
@@ -65,7 +55,7 @@ async def generate_pdf(
         HTML(string=biodata_html).write_pdf(pdf_buffer)
         pdf_buffer.seek(0)
 
-        # Return the PDF as a response
+        # Return the PDF
         return StreamingResponse(
             pdf_buffer,
             media_type="application/pdf",
