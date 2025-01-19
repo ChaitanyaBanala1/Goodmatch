@@ -1,12 +1,18 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from weasyprint import HTML
 from io import BytesIO
 import os
+import logging
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
+# Create the FastAPI app instance
 app = FastAPI()
 
+# Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Replace "*" with specific domains for production
@@ -15,47 +21,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Root endpoint for testing
 @app.get("/")
 def root():
     return {"message": "Welcome to the Goodmatch API!"}
 
 @app.post("/generate-pdf/")
-async def generate_pdf(
-    full_name: str = Form(..., alias="fields[Full%20Name]"),
-    date_of_birth: str = Form(..., alias="fields[Date%20of%20Birth]"),
-    place_of_birth: str = Form(..., alias="fields[Place%20of%20Birth]"),
-    height: str = Form(..., alias="fields[Height]"),
-    education: str = Form(..., alias="fields[Education]"),
-    job_occupation: str = Form(..., alias="fields[Job%20%2F%20Occupation]"),
-    organization: str = Form(..., alias="fields[Organization]"),
-    annual_income: str = Form(..., alias="fields[Annual%20Income]"),
-    fathers_name: str = Form(..., alias="fields[Father's%20Name]"),
-    fathers_occupation: str = Form(..., alias="fields[Father's%20Occupation]"),
-    mothers_name: str = Form(..., alias="fields[Mother's%20Name]"),
-    mothers_occupation: str = Form(..., alias="fields[Mother's%20Occupation]"),
-):
-    template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
-
+async def generate_pdf(request: Request):
     try:
+        # Parse the incoming payload
+        try:
+            form_data = await request.json()
+        except Exception as e:
+            logging.error(f"Invalid JSON payload: {e}")
+            return {"error": f"Invalid JSON payload: {str(e)}"}
+
+        logging.info(f"Received payload: {form_data}")
+
+        # Check if the 'fields' key exists in the payload
+        fields = form_data.get("fields")
+        if not fields:
+            return {"error": "Missing 'fields' in the payload."}
+
+        # Read and process the HTML template
+        template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
+        if not os.path.exists(template_path):
+            return {"error": "HTML template file not found."}
+
         with open(template_path, "r", encoding="utf-8") as file:
             biodata_html = file.read()
 
-        # Replace placeholders with form data
-        biodata_html = biodata_html.replace("{{full_name}}", full_name)
-        biodata_html = biodata_html.replace("{{date_of_birth}}", date_of_birth)
-        biodata_html = biodata_html.replace("{{place_of_birth}}", place_of_birth)
-        biodata_html = biodata_html.replace("{{height}}", height)
-        biodata_html = biodata_html.replace("{{education}}", education)
-        biodata_html = biodata_html.replace("{{job_occupation}}", job_occupation)
-        biodata_html = biodata_html.replace("{{organization}}", organization)
-        biodata_html = biodata_html.replace("{{annual_income}}", annual_income)
-        biodata_html = biodata_html.replace("{{fathers_name}}", fathers_name)
-        biodata_html = biodata_html.replace("{{fathers_occupation}}", fathers_occupation)
-        biodata_html = biodata_html.replace("{{mothers_name}}", mothers_name)
-        biodata_html = biodata_html.replace("{{mothers_occupation}}", mothers_occupation)
+        # Replace placeholders dynamically
+        for key, value in fields.items():
+            placeholder = f"{{{{{key}}}}}"  # Convert "Full Name" to "{{Full Name}}"
+            biodata_html = biodata_html.replace(placeholder, value or "N/A")
 
-        # Generate PDF from HTML
+        # Generate PDF
         pdf_buffer = BytesIO()
         HTML(string=biodata_html).write_pdf(pdf_buffer)
         pdf_buffer.seek(0)
@@ -64,7 +64,8 @@ async def generate_pdf(
         return StreamingResponse(
             pdf_buffer,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={full_name}_biodata.pdf"}
+            headers={"Content-Disposition": f"attachment; filename={fields.get('Full Name', 'biodata')}.pdf"}
         )
     except Exception as e:
+        logging.error(f"Error generating PDF: {e}")
         return {"error": f"An error occurred while generating the PDF: {str(e)}"}
