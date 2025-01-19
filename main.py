@@ -67,10 +67,12 @@ async def generate_pdf(request: Request):
         with open(template_path, "r", encoding="utf-8") as file:
             biodata_html = file.read()
 
-        # Replace placeholders dynamically
+         # Replace placeholders
         for key, value in fields.items():
-            placeholder = f"{{{{{key}}}}}"  # Convert "Full Name" to "{{Full Name}}"
+            placeholder = f"{{{{{key.replace('-', '_').lower()}}}}}"  # Convert "Full-Name" to "{{full_name}}"
             biodata_html = biodata_html.replace(placeholder, value or "N/A")
+
+        logging.info(f"Processed HTML: {biodata_html}")
 
         # Generate PDF
         pdf_buffer = BytesIO()
@@ -78,13 +80,13 @@ async def generate_pdf(request: Request):
         pdf_buffer.seek(0)
 
        # Set the filename
-        filename = fields.get("Full Name", "biodata").replace(" ", "_") + ".pdf"
+        filename = fields.get("full_name", "biodata").replace(" ", "_") + ".pdf"
 
         # Return the PDF
         return StreamingResponse(
             pdf_buffer,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={fields.get('Full Name', 'biodata')}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename={fields.get('full_name', 'biodata')}.pdf"}
         )
     except FileNotFoundError as e:
         logging.error(f"File not found: {e}")
