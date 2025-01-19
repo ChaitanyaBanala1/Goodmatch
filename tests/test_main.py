@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
-from main import app  # Ensure this points to your FastAPI app instance
+from main import app
 
 client = TestClient(app)
 
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to Goodmatch API!"}
+    assert response.json() == {"message": "Welcome to the Goodmatch API!"}

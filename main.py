@@ -15,6 +15,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint for testing
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Goodmatch API!"}
+
 @app.post("/generate-pdf/")
 async def generate_pdf(
     full_name: str = Form(..., alias="fields[Full%20Name]"),
