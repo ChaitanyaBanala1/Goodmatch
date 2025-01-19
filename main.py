@@ -21,9 +21,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
+if not os.path.exists(template_path):
+    raise FileNotFoundError("HTML template file not found. Please ensure it exists in the correct path.")
+
+
 @app.get("/")
 def root():
     return {"message": "Welcome to the Goodmatch API!"}
+
+@app.get("/generate-pdf/")
+def pdf_instructions():
+    return {
+        "message": "This endpoint only supports POST requests. Please submit a valid form with JSON payload."
+    }
 
 @app.post("/generate-pdf/")
 async def generate_pdf(request: Request):
@@ -41,6 +52,12 @@ async def generate_pdf(request: Request):
         fields = form_data.get("fields")
         if not fields:
             return {"error": "Missing 'fields' in the payload."}
+
+        # Validate required fields
+        required_fields = ["full_name"]
+        missing_fields = [key for key in required_fields if key not in fields]
+        if missing_fields:
+            return {"error": f"Missing required fields: {', '.join(missing_fields)}"}
 
         # Read and process the HTML template
         template_path = os.path.join(os.path.dirname(__file__), "html_templates", "biodata_template.html")
@@ -60,12 +77,18 @@ async def generate_pdf(request: Request):
         HTML(string=biodata_html).write_pdf(pdf_buffer)
         pdf_buffer.seek(0)
 
+       # Set the filename
+        filename = fields.get("Full Name", "biodata").replace(" ", "_") + ".pdf"
+
         # Return the PDF
         return StreamingResponse(
             pdf_buffer,
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename={fields.get('Full Name', 'biodata')}.pdf"}
         )
+    except FileNotFoundError as e:
+        logging.error(f"File not found: {e}")
+        return {"error": "The HTML template file is missing. Please contact support."}
     except Exception as e:
-        logging.error(f"Error generating PDF: {e}")
-        return {"error": f"An error occurred while generating the PDF: {str(e)}"}
+        logging.error(f"Unexpected error: {e}")
+        return {"error": f"An unexpected error occurred: {str(e)}"}
