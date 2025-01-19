@@ -5,25 +5,26 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-# Create the FastAPI app instance
 app = FastAPI()
 
 # Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://goodmatch.webflow.io"],  # Your Webflow domain
+    allow_origins=["https://goodmatch.webflow.io"],  # Restrict to your Webflow domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# Define the root endpoint
 @app.get("/")
 def read_root():
     return {"message": "Welcome to FastAPI!"}
 
-# Endpoint to generate a PDF
+# Add GET handler for `/generate-pdf/` to prevent 405 errors
+@app.get("/generate-pdf/")
+async def generate_pdf_get():
+    return {"error": "This endpoint only supports POST requests."}
+
 @app.post("/generate-pdf/")
 async def generate_pdf(request: Request):
     try:
