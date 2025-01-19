@@ -17,6 +17,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Step 1: Add root endpoint for testing
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to Goodmatch API!"}
+
 # Endpoint to generate a PDF
 @app.post("/generate-pdf/")
 async def generate_pdf(
